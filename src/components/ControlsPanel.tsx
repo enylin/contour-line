@@ -1,8 +1,8 @@
-import { useState } from 'react'
 import { TERRAIN_PRESETS } from '../terrain/presets'
 import type { TerrainPresetId } from '../terrain/types'
 
 type ControlsPanelProps = {
+  open: boolean
   preset: TerrainPresetId
   onPresetChange: (preset: TerrainPresetId) => void
   interval: number
@@ -16,6 +16,7 @@ type ControlsPanelProps = {
 }
 
 export function ControlsPanel({
+  open,
   preset,
   onPresetChange,
   interval,
@@ -27,32 +28,19 @@ export function ControlsPanel({
   onContoursOnlyChange,
   onViewChange,
 }: ControlsPanelProps) {
-  const [open, setOpen] = useState(true)
-
   return (
-    <aside className={`controls-sidebar ${open ? 'open' : 'collapsed'}`} aria-label="地形設定側邊欄">
-      <div className="sidebar-header">
-        {open && (
-          <div>
-            <strong>探索設定</strong>
-            <small>換個地形，再從天空看看</small>
-          </div>
-        )}
-        <button
-          type="button"
-          className="sidebar-toggle"
-          aria-expanded={open}
-          aria-controls="terrain-controls"
-          aria-label={open ? '收合設定側邊欄' : '開啟設定側邊欄'}
-          onClick={() => setOpen((current) => !current)}
-        >
-          <span aria-hidden="true">{open ? '›' : '‹'}</span>
-          {!open && <span className="collapsed-label">設定</span>}
-        </button>
-      </div>
-
+    <aside
+      className={`controls-sidebar ${open ? 'open' : ''}`}
+      aria-label="地形設定側邊欄"
+      aria-hidden={!open}
+    >
       {open && (
         <div className="controls" id="terrain-controls">
+          <div className="sidebar-title">
+            <strong>設定</strong>
+            <small>選擇地形與等高線顯示方式</small>
+          </div>
+
           <div className="control-group terrain-control">
             <span className="control-label">地形</span>
             <div className="terrain-options" role="group" aria-label="選擇地形">

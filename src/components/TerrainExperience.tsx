@@ -1,11 +1,10 @@
 import { Canvas } from '@react-three/fiber'
-import { OrthographicCamera } from '@react-three/drei'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { CameraRig, type CameraCommand } from './CameraRig'
 import { ContourLines } from './ContourLines'
 import { ControlsPanel } from './ControlsPanel'
 import { TerrainMesh } from './TerrainMesh'
-import { buildContours, getContourLevels } from '../terrain/contourUtils'
+import { buildContours } from '../terrain/contourUtils'
 import { sampleHeightField } from '../terrain/sampleHeightField'
 import type { TerrainPresetId } from '../terrain/types'
 
@@ -18,8 +17,13 @@ export function TerrainExperience() {
   const [cameraMode, setCameraMode] = useState<CameraCommand['mode']>('threeD')
 
   const field = useMemo(() => sampleHeightField(preset), [preset])
-  const contourLevels = useMemo(() => getContourLevels(field.maxHeight, interval), [field.maxHeight, interval])
   const contours = useMemo(() => buildContours(field, interval), [field, interval])
+  const contourLevels = useMemo(
+    () => [...new Set(contours.map((contour) => contour.level))].sort((a, b) => a - b),
+    [contours],
+  )
+  const activeSelectedLevel =
+    selectedLevel !== null && contourLevels.includes(selectedLevel) ? selectedLevel : null
 
   useEffect(() => {
     if (selectedLevel !== null && !contourLevels.includes(selectedLevel)) {
@@ -31,12 +35,12 @@ export function TerrainExperience() {
     setCameraCommand((current) => ({ id: current.id + 1, mode }))
   }, [])
 
-  const handleCameraComplete = useCallback((mode: CameraCommand['mode']) => {
+  const handleViewSettled = useCallback((mode: CameraCommand['mode']) => {
     setCameraMode(mode)
   }, [])
 
-  const educationText = selectedLevel !== null
-    ? `這條線上的每一個地方都是 ${selectedLevel} 公尺高`
+  const educationText = activeSelectedLevel !== null
+    ? `這條線上的每一個地方都是 ${activeSelectedLevel} 公尺高`
     : cameraMode === 'top'
       ? '從正上方看，山上的線就變成等高線地圖了！'
       : '每一條線都連接相同高度的地方'
@@ -54,8 +58,7 @@ export function TerrainExperience() {
           <Canvas shadows dpr={[1, 1.75]} gl={{ antialias: true }}>
             <color attach="background" args={['#eef2e9']} />
             <fog attach="fog" args={['#eef2e9', 16, 30]} />
-            <OrthographicCamera makeDefault position={[8, 7, 8]} zoom={52} near={0.1} far={100} />
-            <CameraRig command={cameraCommand} onTransitionComplete={handleCameraComplete} />
+            <CameraRig command={cameraCommand} onViewSettled={handleViewSettled} />
 
             <hemisphereLight intensity={1.55} color="#fff8e9" groundColor="#61745c" />
             <directionalLight
@@ -72,7 +75,7 @@ export function TerrainExperience() {
 
             <Suspense fallback={null}>
               <TerrainMesh field={field} contoursOnly={contoursOnly} />
-              <ContourLines contours={contours} selectedLevel={selectedLevel} />
+              <ContourLines contours={contours} selectedLevel={activeSelectedLevel} />
             </Suspense>
 
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.055, 0]} receiveShadow>
@@ -84,7 +87,6 @@ export function TerrainExperience() {
           <div className="canvas-hint" aria-hidden="true">
             <span>↔</span> 拖曳旋轉 · 滾輪或雙指縮放
           </div>
-          <div className="compass" aria-hidden="true">N</div>
         </div>
 
         <div className="lesson-message" role="status" aria-live="polite">
@@ -104,7 +106,7 @@ export function TerrainExperience() {
           interval={interval}
           onIntervalChange={setInterval}
           contourLevels={contourLevels}
-          selectedLevel={selectedLevel}
+          selectedLevel={activeSelectedLevel}
           onSelectedLevelChange={setSelectedLevel}
           contoursOnly={contoursOnly}
           onContoursOnlyChange={setContoursOnly}

@@ -23,7 +23,7 @@ export function TerrainMesh({ field, contoursOnly }: TerrainMeshProps) {
   })
 
   return (
-    <mesh geometry={geometry} castShadow receiveShadow>
+    <mesh geometry={geometry} castShadow={!contoursOnly} receiveShadow>
       <meshStandardMaterial
         ref={materialRef}
         color="#7ea66c"
@@ -31,6 +31,7 @@ export function TerrainMesh({ field, contoursOnly }: TerrainMeshProps) {
         metalness={0}
         transparent
         opacity={1}
+        depthWrite={!contoursOnly}
         side={THREE.DoubleSide}
       />
     </mesh>

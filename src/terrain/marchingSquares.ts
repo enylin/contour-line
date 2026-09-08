@@ -37,6 +37,7 @@ const addSegment = (segments: Segment[], a?: Point2D, b?: Point2D) => {
   if (!Number.isFinite(a.x) || !Number.isFinite(a.z) || !Number.isFinite(b.x) || !Number.isFinite(b.z)) {
     return
   }
+  if (pointKey(a) === pointKey(b)) return
   if (distanceSquared(a, b) < EPSILON * EPSILON) return
   segments.push([a, b])
 }

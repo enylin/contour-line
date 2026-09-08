@@ -2,8 +2,10 @@ import { TERRAIN_PRESETS } from './presets'
 import type { TerrainCategory, TerrainPresetId } from './types'
 
 export type ExamScope = TerrainCategory | 'all'
+export type ExamQuestionType = 'contour-to-terrain' | 'terrain-to-contour'
 
 export type ExamQuestion = {
+  type: ExamQuestionType
   answer: TerrainPresetId
   options: TerrainPresetId[]
 }
@@ -21,6 +23,14 @@ const shuffle = <T,>(items: T[], random: () => number) => {
   return result
 }
 
+const createQuestionTypes = (count: number, random: () => number): ExamQuestionType[] => {
+  const contourToTerrainCount = Math.ceil(count / 2)
+  const types = Array.from({ length: count }, (_, index): ExamQuestionType =>
+    index < contourToTerrainCount ? 'contour-to-terrain' : 'terrain-to-contour',
+  )
+  return shuffle(types, random)
+}
+
 export const createExamQuestions = (
   scope: ExamScope = 'all',
   count = EXAM_LENGTH,
@@ -35,8 +45,9 @@ export const createExamQuestions = (
   }
 
   const answers = shuffle(eligible, random).slice(0, Math.min(count, eligible.length))
+  const questionTypes = createQuestionTypes(answers.length, random)
 
-  return answers.map((answer) => {
+  return answers.map((answer, questionIndex) => {
     const isUsefulDistractor = (candidate: typeof answer) =>
       candidate.id !== answer.id &&
       (!answer.examGroup || !candidate.examGroup || candidate.examGroup !== answer.examGroup)
@@ -51,6 +62,7 @@ export const createExamQuestions = (
     const distractors = distractorPool.slice(0, 3).map((preset) => preset.id)
 
     return {
+      type: questionTypes[questionIndex],
       answer: answer.id,
       options: shuffle([answer.id, ...distractors], random),
     }

@@ -20,6 +20,22 @@ describe('exam question generator', () => {
     }
   })
 
+  it('mixes contour-to-terrain and terrain-to-contour questions evenly', () => {
+    let state = 0x2468ace0
+    const random = () => {
+      state = (1664525 * state + 1013904223) >>> 0
+      return state / 0x100000000
+    }
+
+    const questions = createExamQuestions('all', EXAM_LENGTH, random)
+    const contourToTerrain = questions.filter((question) => question.type === 'contour-to-terrain')
+    const terrainToContour = questions.filter((question) => question.type === 'terrain-to-contour')
+
+    expect(contourToTerrain.length).toBeGreaterThan(0)
+    expect(terrainToContour.length).toBeGreaterThan(0)
+    expect(Math.abs(contourToTerrain.length - terrainToContour.length)).toBeLessThanOrEqual(1)
+  })
+
   it('keeps category-specific exams inside the requested category', () => {
     const basicIds = new Set(
       TERRAIN_PRESETS.filter((preset) => preset.category === 'basic').map((preset) => preset.id),

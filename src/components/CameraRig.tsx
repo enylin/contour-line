@@ -10,6 +10,7 @@ export type CameraCommand = {
 type CameraRigProps = {
   command: CameraCommand
   onViewSettled: (mode: CameraCommand['mode']) => void
+  interactionEnabled?: boolean
 }
 
 const MIN_HALF_HEIGHT = 7.2
@@ -30,7 +31,11 @@ const TOUCHES = {
   three: ACTION.NONE,
 }
 
-export function CameraRig({ command, onViewSettled }: CameraRigProps) {
+export function CameraRig({
+  command,
+  onViewSettled,
+  interactionEnabled = true,
+}: CameraRigProps) {
   const controlsRef = useRef<ComponentRef<typeof CameraControls>>(null)
   const initialized = useRef(false)
   const size = useThree((state) => state.size)
@@ -75,6 +80,7 @@ export function CameraRig({ command, onViewSettled }: CameraRigProps) {
       <CameraControls
         ref={controlsRef}
         makeDefault
+        enabled={interactionEnabled}
         onRest={handleRest}
         minPolarAngle={0.0005}
         maxPolarAngle={Math.PI / 2 - 0.035}

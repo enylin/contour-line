@@ -1,26 +1,32 @@
 import { Line } from '@react-three/drei'
 import { useMemo } from 'react'
-import { riverChannelX, terrainHeightMeters, WORLD_HEIGHT_DIVISOR } from '../terrain/presets'
+import {
+  meanderChannelX,
+  riverChannelX,
+  terrainHeightMeters,
+  WORLD_HEIGHT_DIVISOR,
+} from '../terrain/presets'
 import type { TerrainPresetId } from '../terrain/types'
 
 type TerrainFeaturesProps = {
   preset: TerrainPresetId
   contoursOnly: boolean
+  hidden?: boolean
 }
 
-export function TerrainFeatures({ preset, contoursOnly }: TerrainFeaturesProps) {
+export function TerrainFeatures({ preset, contoursOnly, hidden = false }: TerrainFeaturesProps) {
   const riverPoints = useMemo(() => {
-    if (preset !== 'river') return []
+    if (preset !== 'river' && preset !== 'meander-valley') return []
 
     return Array.from({ length: 101 }, (_, index) => {
       const z = -4.9 + (index / 100) * 9.8
-      const x = riverChannelX(z)
-      const y = terrainHeightMeters('river', x, z) / WORLD_HEIGHT_DIVISOR + 0.035
+      const x = preset === 'river' ? riverChannelX(z) : meanderChannelX(z)
+      const y = terrainHeightMeters(preset, x, z) / WORLD_HEIGHT_DIVISOR + 0.035
       return [x, y, z] as [number, number, number]
     })
   }, [preset])
 
-  if (preset !== 'river') return null
+  if (hidden || (preset !== 'river' && preset !== 'meander-valley')) return null
 
   return (
     <group renderOrder={4}>

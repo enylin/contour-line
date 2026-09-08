@@ -1,4 +1,12 @@
-export type TerrainPresetId = 'standard' | 'gentle' | 'steep' | 'double'
+export type TerrainPresetId =
+  | 'standard'
+  | 'gentle'
+  | 'steep'
+  | 'asymmetric'
+  | 'double'
+  | 'ridge'
+  | 'river'
+  | 'plateau'
 
 export type Point2D = {
   x: number

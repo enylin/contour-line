@@ -13,8 +13,8 @@ type CameraRigProps = {
   interactionEnabled?: boolean
 }
 
-const MIN_HALF_HEIGHT = 7.2
-const MIN_HALF_WIDTH = 8
+const MIN_HALF_HEIGHT = 8.15
+const MIN_HALF_WIDTH = 9.1
 const TOP_VIEW_THRESHOLD = 0.03
 const ACTION = CameraControlsImpl.ACTION
 
@@ -51,9 +51,9 @@ export function CameraRig({
     initialized.current = true
 
     if (command.mode === 'top') {
-      void controls.setLookAt(0, 12, 0.01, 0, 1.65, 0, animated)
+      void controls.setLookAt(0, 13, 0.01, 0, 1.55, 0, animated)
     } else {
-      void controls.setLookAt(8, 7, 8, 0, 1.65, 0, animated)
+      void controls.setLookAt(9, 7.8, 9, 0, 1.55, 0, animated)
     }
   }, [command.id, command.mode])
 
@@ -68,7 +68,7 @@ export function CameraRig({
       <OrthographicCamera
         makeDefault
         manual
-        position={[8, 7, 8]}
+        position={[9, 7.8, 9]}
         left={-halfWidth}
         right={halfWidth}
         top={halfHeight}
@@ -84,8 +84,8 @@ export function CameraRig({
         onRest={handleRest}
         minPolarAngle={0.0005}
         maxPolarAngle={Math.PI / 2 - 0.035}
-        minZoom={0.7}
-        maxZoom={2.6}
+        minZoom={0.72}
+        maxZoom={3}
         smoothTime={0.55}
         draggingSmoothTime={0.08}
         mouseButtons={MOUSE_BUTTONS}

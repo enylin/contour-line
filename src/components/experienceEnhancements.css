@@ -3,7 +3,7 @@
 }
 
 .canvas-wrap {
-  transition: right .24s ease;
+  transition: right .24s ease, bottom .24s ease;
 }
 
 .controls-sidebar {
@@ -136,10 +136,34 @@
 }
 
 @media (max-width: 700px) {
+  .fullscreen-experience.exam-mode {
+    --mobile-exam-sheet-height: clamp(292px, 45dvh, 410px);
+  }
+
+  .fullscreen-experience.exam-mode .canvas-wrap {
+    bottom: var(--mobile-exam-sheet-height);
+  }
+
   .exam-card.visual-exam {
-    width: calc(100% - 14px);
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 7px);
-    padding: 10px;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: var(--mobile-exam-sheet-height);
+    transform: none;
+    padding: 10px 10px calc(env(safe-area-inset-bottom, 0px) + 10px);
+    border-radius: 22px 22px 0 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .exam-card.visual-exam::before {
+    content: "";
+    display: block;
+    width: 38px;
+    height: 4px;
+    margin: -2px auto 8px;
+    border-radius: 999px;
+    background: rgba(92, 105, 96, .24);
   }
 
   .exam-options.visual {
@@ -148,13 +172,17 @@
   }
 
   .exam-option.visual {
-    grid-template-rows: 78px auto;
+    grid-template-rows: clamp(66px, 10dvh, 82px) auto;
     padding: 5px;
   }
 
   .exam-option.visual .exam-option-letter {
     top: 9px;
     left: 9px;
+  }
+
+  .exam-heading {
+    margin-bottom: 8px;
   }
 
   .exam-heading strong {
@@ -166,12 +194,36 @@
   }
 
   .exam-interaction-hint {
-    margin-bottom: 7px;
+    margin: -2px 0 7px;
     font-size: .69rem;
   }
 
   .exam-feedback {
     margin-top: 8px;
+  }
+}
+
+@media (max-width: 430px) {
+  .fullscreen-experience.exam-mode {
+    --mobile-exam-sheet-height: clamp(286px, 47dvh, 385px);
+  }
+
+  .exam-option.visual {
+    grid-template-rows: clamp(62px, 9dvh, 76px) auto;
+  }
+
+  .exam-option-name {
+    font-size: .71rem;
+  }
+}
+
+@media (max-height: 620px) and (max-width: 700px) {
+  .fullscreen-experience.exam-mode {
+    --mobile-exam-sheet-height: clamp(270px, 49dvh, 310px);
+  }
+
+  .exam-option.visual {
+    grid-template-rows: 60px auto;
   }
 }
 
@@ -208,5 +260,9 @@
 
   .contour-preview-line {
     stroke: #c5d8ca;
+  }
+
+  .exam-card.visual-exam::before {
+    background: rgba(230, 238, 232, .2);
   }
 }

@@ -75,7 +75,7 @@ export function ControlsPanel({
       <div className="controls" id="terrain-controls">
         <div className="sidebar-title">
           <strong>{examMode ? '考試模式' : '設定'}</strong>
-          <small>{examMode ? '兩種題型交錯，練習 3D 與等高線互相判讀' : '探索 30 種地形與等高線'}</small>
+          <small>{examMode ? '兩種題型交錯，練習 3D 與等高線互相判讀' : `探索 ${TERRAIN_PRESETS.length} 種地形與等高線`}</small>
         </div>
 
         {examMode ? (
@@ -190,14 +190,14 @@ export function ControlsPanel({
               <input
                 id="contour-interval"
                 type="range"
-                min="25"
-                max="100"
-                step="25"
+                min="10"
+                max="150"
+                step="5"
                 value={interval}
                 onChange={(event) => onIntervalChange(Number(event.target.value))}
               />
               <div className="range-labels" aria-hidden="true">
-                <span>25m</span><span>50m</span><span>75m</span><span>100m</span>
+                <span>10m</span><span>50m</span><span>100m</span><span>150m</span>
               </div>
             </div>
 

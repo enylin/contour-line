@@ -173,11 +173,11 @@ const unevenDouble = (x: number, z: number) =>
   172 * gaussian(x, z, 1.8, -0.55, 0.52)
 
 const fiveHills = (x: number, z: number) =>
-  230 * gaussian(x, z, 0, 0, 0.46) +
-  198 * gaussian(x, z, -2.35, 0, 0.55) +
-  184 * gaussian(x, z, 2.35, 0, 0.52) +
-  205 * gaussian(x, z, 0, 2.35, 0.54) +
-  176 * gaussian(x, z, 0, -2.35, 0.58)
+  238 * gaussian(x, z, 0, 0, 0.72) +
+  220 * gaussian(x, z, -2.8, 0, 0.68) +
+  210 * gaussian(x, z, 2.8, 0, 0.68) +
+  225 * gaussian(x, z, 0, 2.8, 0.68) +
+  205 * gaussian(x, z, 0, -2.8, 0.68)
 
 const forkedValley = (x: number, z: number) => {
   const separation = Math.max(0, z) * 0.34

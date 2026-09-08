@@ -75,7 +75,10 @@ const fillAnswers = <T,>(pool: T[], count: number, random: () => number): T[] =>
   return answers
 }
 
-export const getExamVisualFamily = (id: TerrainPresetId) => VISUAL_FAMILY[id] ?? id
+export const getExamVisualFamily = (id: TerrainPresetId) => {
+  const preset = TERRAIN_PRESETS.find((item) => item.id === id)
+  return preset?.examGroup ?? VISUAL_FAMILY[id] ?? id
+}
 
 export const createExamQuestions = (
   scope: ExamScope = 'all',
@@ -102,21 +105,26 @@ export const createExamQuestions = (
   const questionTypes = createQuestionTypes(answers.length, random)
 
   return answers.map((answer, questionIndex) => {
-    const answerFamily = answer.examGroup ?? getExamVisualFamily(answer.id)
-    const isUsefulDistractor = (candidate: typeof answer) => {
-      if (candidate.id === answer.id) return false
-      const candidateFamily = candidate.examGroup ?? getExamVisualFamily(candidate.id)
-      return candidateFamily !== answerFamily
-    }
+    const answerFamily = getExamVisualFamily(answer.id)
+    const sameCategory = shuffle(
+      eligible.filter((candidate) => candidate.id !== answer.id && candidate.category === answer.category),
+      random,
+    )
+    const otherCategories = shuffle(
+      eligible.filter((candidate) => candidate.id !== answer.id && candidate.category !== answer.category),
+      random,
+    )
+    const distractorPool = [...sameCategory, ...otherCategories]
+    const usedFamilies = new Set([answerFamily])
+    const distractors: TerrainPresetId[] = []
 
-    const sameCategory = eligible.filter(
-      (candidate) => isUsefulDistractor(candidate) && candidate.category === answer.category,
-    )
-    const otherCategories = eligible.filter(
-      (candidate) => isUsefulDistractor(candidate) && candidate.category !== answer.category,
-    )
-    const distractorPool = [...shuffle(sameCategory, random), ...shuffle(otherCategories, random)]
-    const distractors = distractorPool.slice(0, 3).map((preset) => preset.id)
+    for (const candidate of distractorPool) {
+      const candidateFamily = getExamVisualFamily(candidate.id)
+      if (usedFamilies.has(candidateFamily)) continue
+      usedFamilies.add(candidateFamily)
+      distractors.push(candidate.id)
+      if (distractors.length === 3) break
+    }
 
     if (distractors.length < 3) {
       throw new Error(`Not enough visually distinct distractors for ${answer.id}`)

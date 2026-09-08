@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createExamQuestions, EXAM_LENGTH } from './exam'
+import { createExamQuestions, EXAM_LENGTH, getExamVisualFamily } from './exam'
 import { TERRAIN_PRESETS } from './presets'
 
 describe('exam question generator', () => {
@@ -49,7 +49,39 @@ describe('exam question generator', () => {
     }
   })
 
-  it('avoids putting visually ambiguous sibling terrains in the same question', () => {
+  it('keeps basic exam answers focused on highly distinguishable terrain shapes', () => {
+    let state = 0x2468ace0
+    const random = () => {
+      state = (1664525 * state + 1013904223) >>> 0
+      return state / 0x100000000
+    }
+    const questions = createExamQuestions('basic', 10, random)
+    const subtleRoundVariants = new Set(['gentle', 'steep', 'cone'])
+
+    expect(questions).toHaveLength(10)
+    expect(questions.every((question) => !subtleRoundVariants.has(question.answer))).toBe(true)
+  })
+
+  it('never puts visually equivalent families in the same question', () => {
+    let state = 0x13579bdf
+    const random = () => {
+      state = (1103515245 * state + 12345) >>> 0
+      return state / 0x100000000
+    }
+
+    for (const scope of ['basic', 'advanced', 'irregular', 'all'] as const) {
+      const questions = createExamQuestions(scope, 10, random)
+      for (const question of questions) {
+        const answerFamily = getExamVisualFamily(question.answer)
+        const distractorFamilies = question.options
+          .filter((option) => option !== question.answer)
+          .map(getExamVisualFamily)
+        expect(distractorFamilies).not.toContain(answerFamily)
+      }
+    }
+  })
+
+  it('avoids putting explicitly grouped sibling terrains in the same question', () => {
     let state = 0xabcdef01
     const random = () => {
       state = (1103515245 * state + 12345) >>> 0

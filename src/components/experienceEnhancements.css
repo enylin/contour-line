@@ -137,7 +137,7 @@
 
 @media (max-width: 700px) {
   .fullscreen-experience.exam-mode {
-    --mobile-exam-sheet-height: clamp(292px, 45dvh, 410px);
+    --mobile-exam-sheet-height: clamp(250px, 42dvh, 380px);
   }
 
   .fullscreen-experience.exam-mode .canvas-wrap {
@@ -205,7 +205,7 @@
 
 @media (max-width: 430px) {
   .fullscreen-experience.exam-mode {
-    --mobile-exam-sheet-height: clamp(286px, 47dvh, 385px);
+    --mobile-exam-sheet-height: clamp(248px, 44dvh, 360px);
   }
 
   .exam-option.visual {
@@ -219,7 +219,7 @@
 
 @media (max-height: 620px) and (max-width: 700px) {
   .fullscreen-experience.exam-mode {
-    --mobile-exam-sheet-height: clamp(270px, 49dvh, 310px);
+    --mobile-exam-sheet-height: clamp(240px, 45dvh, 285px);
   }
 
   .exam-option.visual {

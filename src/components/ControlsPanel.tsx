@@ -84,7 +84,7 @@ export function ControlsPanel({
           max="100"
           step="25"
           value={interval}
-          onChange={(event) => onIntervalChange(Number(event.target.value))
+          onChange={(event) => onIntervalChange(Number(event.target.value))}
         />
         <div className="range-labels" aria-hidden="true">
           <span>25m</span><span>50m</span><span>75m</span><span>100m</span>

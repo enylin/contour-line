@@ -12,7 +12,7 @@ const toSvgPoint = (x: number, z: number) => {
 export function ContourMapPreview({ preset }: { preset: TerrainPresetId }) {
   const contours = useMemo(() => {
     const field = sampleHeightField(preset, 71)
-    return buildContours(field, 50)
+    return buildContours(field, 25)
   }, [preset])
 
   return (

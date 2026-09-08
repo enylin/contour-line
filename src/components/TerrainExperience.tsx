@@ -14,7 +14,7 @@ import type { TerrainPresetId } from '../terrain/types'
 
 export function TerrainExperience() {
   const [preset, setPreset] = useState<TerrainPresetId>('standard')
-  const [interval, setInterval] = useState(50)
+  const [interval, setInterval] = useState(25)
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null)
   const [contoursOnly, setContoursOnly] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -85,7 +85,7 @@ export function TerrainExperience() {
     setExamIndex(0)
     setExamScore(0)
     setExamSelectedAnswer(null)
-    setInterval(50)
+    setInterval(25)
     setSidebarOpen(false)
     presentExamQuestion(questions[0])
   }, [presentExamQuestion])

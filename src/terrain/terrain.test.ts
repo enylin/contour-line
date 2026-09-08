@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { buildTerrainGeometry } from './buildTerrainGeometry'
 import { buildContours, getContourLevels } from './contourUtils'
 import { marchingSquares } from './marchingSquares'
-import { TERRAIN_PRESETS, terrainHeightMeters } from './presets'
+import { TERRAIN_PRESETS, riverChannelX, terrainHeightMeters } from './presets'
 import { sampleHeightField } from './sampleHeightField'
 
 const isFinitePoint = (point: { x: number; z: number }) =>
@@ -32,6 +32,26 @@ describe('terrain presets', () => {
     expect(terrainHeightMeters('standard', 0, 0)).toBeGreaterThan(
       terrainHeightMeters('standard', 5, 5),
     )
+  })
+
+  it('makes one side of the asymmetric hill much gentler than the other', () => {
+    const centerX = -0.45
+    const steepSide = terrainHeightMeters('asymmetric', centerX - 2, 0)
+    const gentleSide = terrainHeightMeters('asymmetric', centerX + 2, 0)
+
+    expect(gentleSide).toBeGreaterThan(steepSide * 3)
+  })
+
+  it('carves a river channel below its valley walls and slopes it upstream', () => {
+    const z = 0
+    const channelX = riverChannelX(z)
+    const channel = terrainHeightMeters('river', channelX, z)
+    const valleyWall = terrainHeightMeters('river', channelX + 2.5, z)
+    const downstream = terrainHeightMeters('river', riverChannelX(-4), -4)
+    const upstream = terrainHeightMeters('river', riverChannelX(4), 4)
+
+    expect(valleyWall).toBeGreaterThan(channel + 70)
+    expect(upstream).toBeGreaterThan(downstream + 70)
   })
 
   it('builds a finite indexed terrain mesh with the expected grid shape', () => {
@@ -71,12 +91,22 @@ describe('contours', () => {
     expect(contours.every((contour) => contour.closed)).toBe(true)
   })
 
-  it('only emits finite contour coordinates', () => {
-    const field = sampleHeightField('double', 81)
-    const contours = buildContours(field, 25)
+  it('creates open V-shaped map contours for the river valley', () => {
+    const field = sampleHeightField('river', 121)
+    const contours = buildContours(field, 50)
+
     expect(contours.length).toBeGreaterThan(0)
-    for (const contour of contours) {
-      expect(contour.points.every(isFinitePoint)).toBe(true)
+    expect(contours.some((contour) => !contour.closed)).toBe(true)
+  })
+
+  it('only emits finite contour coordinates for every terrain preset', () => {
+    for (const preset of TERRAIN_PRESETS) {
+      const field = sampleHeightField(preset.id, 81)
+      const contours = buildContours(field, 25)
+      expect(contours.length).toBeGreaterThan(0)
+      for (const contour of contours) {
+        expect(contour.points.every(isFinitePoint)).toBe(true)
+      }
     }
   })
 
@@ -112,9 +142,11 @@ describe('contours', () => {
     expect(tinySegmentCount).toBe(0)
   })
 
-  it('keeps all generated preset contours closed inside the sampled terrain bounds', () => {
-    for (const preset of TERRAIN_PRESETS) {
-      const field = sampleHeightField(preset.id, 121)
+  it('keeps naturally enclosed mountain contours closed inside the terrain bounds', () => {
+    const enclosedPresets = ['standard', 'gentle', 'steep', 'double', 'ridge', 'plateau'] as const
+
+    for (const preset of enclosedPresets) {
+      const field = sampleHeightField(preset, 121)
       const contours = buildContours(field, 25)
       expect(contours.length).toBeGreaterThan(0)
       expect(contours.every((contour) => contour.closed)).toBe(true)

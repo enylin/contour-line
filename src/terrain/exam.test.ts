@@ -62,7 +62,7 @@ describe('exam question generator', () => {
     expect(questions.every((question) => !subtleRoundVariants.has(question.answer))).toBe(true)
   })
 
-  it('never puts visually equivalent families in the same question', () => {
+  it('uses four different visual families in every question', () => {
     let state = 0x13579bdf
     const random = () => {
       state = (1103515245 * state + 12345) >>> 0
@@ -72,11 +72,8 @@ describe('exam question generator', () => {
     for (const scope of ['basic', 'advanced', 'irregular', 'all'] as const) {
       const questions = createExamQuestions(scope, 10, random)
       for (const question of questions) {
-        const answerFamily = getExamVisualFamily(question.answer)
-        const distractorFamilies = question.options
-          .filter((option) => option !== question.answer)
-          .map(getExamVisualFamily)
-        expect(distractorFamilies).not.toContain(answerFamily)
+        const families = question.options.map(getExamVisualFamily)
+        expect(new Set(families).size).toBe(4)
       }
     }
   })

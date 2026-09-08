@@ -93,9 +93,9 @@ export const createExamQuestions = (
     throw new Error('Exam requires at least four eligible terrain presets')
   }
 
-  const answerPool = scope === 'basic'
-    ? eligible.filter((preset) => BASIC_EXAM_ANSWER_IDS.has(preset.id))
-    : eligible
+  const answerPool = eligible.filter(
+    (preset) => preset.category !== 'basic' || BASIC_EXAM_ANSWER_IDS.has(preset.id),
+  )
 
   if (answerPool.length < 4) {
     throw new Error('Exam answer pool requires at least four terrain presets')

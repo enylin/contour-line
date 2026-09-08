@@ -6,6 +6,7 @@ import { ControlsPanel } from './ControlsPanel'
 import { ExamOverlay } from './ExamOverlay'
 import { TerrainFeatures } from './TerrainFeatures'
 import { TerrainMesh } from './TerrainMesh'
+import './experienceEnhancements.css'
 import { buildContours } from '../terrain/contourUtils'
 import { createExamQuestions, type ExamQuestion, type ExamScope } from '../terrain/exam'
 import { sampleHeightField } from '../terrain/sampleHeightField'
@@ -62,6 +63,19 @@ export function TerrainExperience() {
 
   const handleViewSettled = useCallback((_mode: CameraCommand['mode']) => {}, [])
 
+  const presentExamQuestion = useCallback((question: ExamQuestion) => {
+    setSelectedLevel(null)
+    setPreset(question.answer)
+
+    if (question.type === 'contour-to-terrain') {
+      setContoursOnly(true)
+      requestView('top')
+    } else {
+      setContoursOnly(false)
+      requestView('threeD')
+    }
+  }, [requestView])
+
   const startExam = useCallback((scope: ExamScope) => {
     const questions = createExamQuestions(scope)
     if (questions.length === 0) return
@@ -71,13 +85,10 @@ export function TerrainExperience() {
     setExamIndex(0)
     setExamScore(0)
     setExamSelectedAnswer(null)
-    setSelectedLevel(null)
     setInterval(50)
-    setContoursOnly(true)
-    setPreset(questions[0].answer)
     setSidebarOpen(false)
-    requestView('top')
-  }, [requestView])
+    presentExamQuestion(questions[0])
+  }, [presentExamQuestion])
 
   const exitExam = useCallback(() => {
     setExamQuestions([])
@@ -97,8 +108,14 @@ export function TerrainExperience() {
     if (answer === currentQuestion.answer) {
       setExamScore((score) => score + 1)
     }
-    setContoursOnly(false)
-    requestView('threeD')
+
+    if (currentQuestion.type === 'contour-to-terrain') {
+      setContoursOnly(false)
+      requestView('threeD')
+    } else {
+      setContoursOnly(true)
+      requestView('top')
+    }
   }, [currentQuestion, examSelectedAnswer, requestView])
 
   const nextExamQuestion = useCallback(() => {
@@ -115,21 +132,26 @@ export function TerrainExperience() {
     const nextQuestion = examQuestions[nextIndex]
     setExamIndex(nextIndex)
     setExamSelectedAnswer(null)
-    setSelectedLevel(null)
-    setPreset(nextQuestion.answer)
-    setContoursOnly(true)
-    requestView('top')
-  }, [currentQuestion, examIndex, examQuestions, examSelectedAnswer, requestView])
+    presentExamQuestion(nextQuestion)
+  }, [currentQuestion, examIndex, examQuestions, examSelectedAnswer, presentExamQuestion])
 
-  const hideTerrainForQuestion = examMode && !examFinished && !examRevealed
-  const allowCameraInteraction = !examMode || examFinished || examRevealed
+  const unansweredExamQuestion = examMode && !examFinished && !examRevealed
+  const hideTerrainForQuestion =
+    unansweredExamQuestion && currentQuestion?.type === 'contour-to-terrain'
+  const hideContoursForQuestion =
+    unansweredExamQuestion && currentQuestion?.type === 'terrain-to-contour'
+  const allowCameraInteraction =
+    !examMode || examFinished || examRevealed || currentQuestion?.type === 'terrain-to-contour'
 
   return (
-    <main className="fullscreen-experience" aria-label="互動式三維等高線地形">
+    <main
+      className={`fullscreen-experience ${sidebarOpen ? 'sidebar-open' : ''} ${examMode ? 'exam-mode' : ''}`}
+      aria-label="互動式三維等高線地形"
+    >
       <div className="canvas-wrap">
         <Canvas shadows dpr={[1, 1.75]} gl={{ antialias: true }}>
           <color attach="background" args={['#eef2e9']} />
-          <fog attach="fog" args={['#eef2e9', 16, 30]} />
+          <fog attach="fog" args={['#eef2e9', 18, 34]} />
           <CameraRig
             command={cameraCommand}
             onViewSettled={handleViewSettled}
@@ -143,10 +165,10 @@ export function TerrainExperience() {
             intensity={2.1}
             shadow-mapSize-width={1024}
             shadow-mapSize-height={1024}
-            shadow-camera-left={-8}
-            shadow-camera-right={8}
-            shadow-camera-top={8}
-            shadow-camera-bottom={-8}
+            shadow-camera-left={-9}
+            shadow-camera-right={9}
+            shadow-camera-top={9}
+            shadow-camera-bottom={-9}
           />
 
           <Suspense fallback={null}>
@@ -155,7 +177,9 @@ export function TerrainExperience() {
               contoursOnly={contoursOnly}
               hidden={hideTerrainForQuestion}
             />
-            <ContourLines contours={contours} selectedLevel={activeSelectedLevel} />
+            {!hideContoursForQuestion && (
+              <ContourLines contours={contours} selectedLevel={activeSelectedLevel} />
+            )}
             <TerrainFeatures
               preset={preset}
               contoursOnly={contoursOnly}
@@ -164,7 +188,7 @@ export function TerrainExperience() {
           </Suspense>
 
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.055, 0]} receiveShadow>
-            <planeGeometry args={[14, 14]} />
+            <planeGeometry args={[16, 16]} />
             <meshStandardMaterial color="#d9dfd2" roughness={1} />
           </mesh>
         </Canvas>
@@ -183,15 +207,6 @@ export function TerrainExperience() {
           onNext={nextExamQuestion}
           onRestart={() => startExam(examScope)}
           onExit={exitExam}
-        />
-      )}
-
-      {sidebarOpen && (
-        <button
-          type="button"
-          className="sidebar-backdrop"
-          aria-label="關閉設定"
-          onClick={() => setSidebarOpen(false)}
         />
       )}
 
